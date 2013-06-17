@@ -15,11 +15,17 @@
 @interface CouchModelFactory : NSObject
 {
     NSMutableDictionary* _typeDict;
+	NSString* _documentTypeProperty;
 }
 
 /** Returns a global shared CouchModelFactory that's consulted by all databases.
     Mappings registered in this instance will be used as a fallback by all other instances if they don't have their own. */
 + (CouchModelFactory*) sharedInstance;
+
+
+/** Name of property that contains the document type.
+    Defaults to "type". */
+@property (nonatomic, assign) NSString* documentTypeProperty;
 
 /** Given a document, attempts to return a CouchModel for it.
     If the document's modelObject property is set, it returns that value.

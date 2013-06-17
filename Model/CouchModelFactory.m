@@ -16,6 +16,10 @@
 static CouchModelFactory* sSharedInstance;
 
 
+@synthesize documentTypeProperty = _documentTypeProperty;
+
+
+
 + (CouchModelFactory*) sharedInstance {
     static dispatch_once_t onceToken;
     dispatch_once(&onceToken, ^{
@@ -29,6 +33,7 @@ static CouchModelFactory* sSharedInstance;
     self = [super init];
     if (self) {
         _typeDict = [[NSMutableDictionary alloc] init];
+		_documentTypeProperty = @"type";
     }
     return self;
 }
@@ -59,7 +64,7 @@ static CouchModelFactory* sSharedInstance;
 
 
 - (Class) classForDocument: (CouchDocument*)document {
-    NSString* type = [document propertyForKey: @"type"];
+    NSString* type = [document propertyForKey: _documentTypeProperty];
     return type ? [self classForDocumentType: type] : nil;
 }
 
