@@ -158,7 +158,7 @@
         additionalProperties = @{};
     }
     
-    NSMutableDictionary* properties = [additionalProperties mutableCopy];
+    NSMutableDictionary* properties = [[additionalProperties mutableCopy] autorelease];
     [properties setValue:[NSNumber numberWithBool:TRUE] forKey:@"_deleted"];
     [properties setValue:[self getValueOfProperty:@"_id"] forKey:@"_id"];
     [properties setValue:[self getValueOfProperty:@"_rev"] forKey:@"_rev"];
@@ -372,7 +372,7 @@
 
 - (NSData*) getDataProperty: (NSString*)property {
     NSData* value = [_properties objectForKey: property];
-    if (!value) {
+    if (!value && !self.isNew && ![_changedNames containsObject: property]) {
         id rawValue = [_document propertyForKey: property];
         if ([rawValue isKindOfClass: [NSString class]])
             value = [RESTBody dataWithBase64: rawValue];
@@ -386,7 +386,7 @@
 
 - (NSDate*) getDateProperty: (NSString*)property {
     NSDate* value = [_properties objectForKey: property];
-    if (!value) {
+    if (!value && !self.isNew && ![_changedNames containsObject: property]) {
         id rawValue = [_document propertyForKey: property];
         if ([rawValue isKindOfClass: [NSString class]])
             value = [RESTBody dateWithJSONObject: rawValue];
