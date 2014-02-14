@@ -24,6 +24,8 @@ extern NSString* const CouchHTTPErrorDomain;
 /** Type of block that's called when a RESTOperation completes (see -onComplete:). */
 typedef void (^OnCompleteBlock)();
 
+/** Type of block that's called when a RESTOperation reports progress (see -onUpdateProgress:). */
+typedef void (^OnUpdateProgressBlock)(NSUInteger bytesSinceLastUpdate, NSUInteger bytesSoFar, NSUInteger expectedTotalBytes);
 
 /** Represents an HTTP request to a RESTResource, and its response.
     Can be used either synchronously or asynchronously. Methods that return information about the
@@ -47,6 +49,7 @@ typedef void (^OnCompleteBlock)();
     id _resultObject;
 
     NSMutableArray* _onCompletes;
+	NSMutableArray* _onUpdateProgresses;
 }
 
 /** Initializes a RESTOperation, but doesn't start loading it yet.
@@ -84,10 +87,15 @@ typedef void (^OnCompleteBlock)();
 - (RESTOperation*) start;
 
 /** Will call the given block when the request finishes.
-    This method may be called multiple times; blocks will be called in the order added.
-    @param onComplete  The block to be called when the request finishes.
-    @return  YES if the block has been called by the time this method returns, NO if it will be called in the future. */
+ This method may be called multiple times; blocks will be called in the order added.
+ @param onComplete  The block to be called when the request finishes.
+ @return  YES if the block has been called by the time this method returns, NO if it will be called in the future. */
 - (BOOL) onCompletion: (OnCompleteBlock)onComplete;
+
+/** Will call the given block to report progress of a request.
+ This method may be called multiple times; it may be called never; blocks will be called in the order added.
+ @param onUpdateProgress  The block to be called to report progress. */
+- (void) onUpdateProgress: (OnUpdateProgressBlock)onUpdateProgress;
 
 /** Blocks till any pending network operation finishes (i.e. -isComplete becomes true.)
     -start will be called if it hasn't yet been.

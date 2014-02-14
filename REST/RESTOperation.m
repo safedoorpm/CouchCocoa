@@ -70,6 +70,7 @@ RESTLogLevel gRESTLogLevel = kRESTLogNothing;
     [_error release];
     [_resource release];
     [_onCompletes release];
+	[_onUpdateProgresses release];
     [_body release];
     [super dealloc];
 }
@@ -260,6 +261,17 @@ RESTLogLevel gRESTLogLevel = kRESTLogNothing;
 }
 
 
+- (void) onUpdateProgress:(OnUpdateProgressBlock)onUpdateProgress {
+    if (_state != kRESTObjectReady && _state != kRESTObjectFailed) {
+        if (!_onUpdateProgresses)
+            _onUpdateProgresses = [[NSMutableArray alloc] init];
+        onUpdateProgress = [onUpdateProgress copy];
+        [_onUpdateProgresses addObject: onUpdateProgress];
+        [onUpdateProgress release];
+    }
+}
+
+
 @synthesize retryCount=_retryCount;
 
 
@@ -346,7 +358,10 @@ RESTLogLevel gRESTLogLevel = kRESTLogNothing;
     _onCompletes = nil;
     for (OnCompleteBlock onComplete in onCompletes)
         onComplete();
-    
+
+    (void) [_onUpdateProgresses autorelease];
+    _onUpdateProgresses = nil;
+
     [_resource operationDidComplete: self];
 }
 
@@ -453,6 +468,13 @@ RESTLogLevel gRESTLogLevel = kRESTLogNothing;
         NSError* error = [[self class] errorWithHTTPStatus: httpStatus message: nil URL: self.URL];
         [self completedWithError: error];
     }
+}
+
+
+- (void)connection:(NSURLConnection *)connection didSendBodyData:(NSInteger)bytesWritten totalBytesWritten:(NSInteger)totalBytesWritten totalBytesExpectedToWrite:(NSInteger)totalBytesExpectedToWrite {
+    if (_onUpdateProgresses != nil && _onUpdateProgresses.count > 0)
+        for (OnUpdateProgressBlock onUpdateProgress in _onUpdateProgresses)
+            onUpdateProgress(bytesWritten, totalBytesWritten, totalBytesExpectedToWrite);
 }
 
 
