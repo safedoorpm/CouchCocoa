@@ -111,6 +111,19 @@ NSString* const kCouchDocumentChangeNotification = @"CouchDocumentChange";
     return _currentRevision;
 }
 
+// RESTResource's _parent is retained, thus _currentRevision is retaining this CouchDocument
+// instance.  At the same time self is retaining _currentRevision, thus a retain cycle is formed.
+// This breaks the cycle and must be called when clients are not longer interested
+// in this CouchDocument.
+//
+// See: https://github.com/couchbaselabs/CouchCocoa/issues/23
+//
+- (void) breakCurrentRevisionRetainCycle
+{
+	[_currentRevision autorelease];
+	_currentRevision = nil;
+}
+
 
 - (void) loadCurrentRevisionFrom: (CouchQueryRow*)row {
     NSString* rev = row.documentRevision;

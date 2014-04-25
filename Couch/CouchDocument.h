@@ -52,6 +52,7 @@
 /** The current/latest revision. This object is cached.
     This method may need to make a synchronous call to the server to fetch the revision, if its revision ID is not yet known. */
 - (CouchRevision*) currentRevision;
+- (void) breakCurrentRevisionRetainCycle;
 
 /** The revision with the specified ID.
     This is merely a factory method that doesn't fetch anything from the server,
